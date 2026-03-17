@@ -311,6 +311,35 @@ input:focus,textarea:focus,select:focus{border-color:var(--green)}
 .confetti{position:fixed;inset:0;pointer-events:none;z-index:998}
 .confetti span{position:absolute;width:8px;height:8px;border-radius:2px;animation:conffall 1.2s ease forwards}
 @keyframes conffall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(100vh) rotate(720deg);opacity:0}}
+
+.ai-explain-btn{
+  display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+  background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple);
+  border-radius:20px;font-family:inherit;font-size:11px;font-weight:700;
+  cursor:pointer;transition:.12s;margin-left:4px;vertical-align:middle
+}
+.ai-explain-btn:hover{background:var(--purple);color:#fff}
+.ai-bubble{
+  background:var(--purple-bg);border:1px solid var(--purple);border-radius:var(--r);
+  padding:14px 16px;margin-top:10px;font-size:13px;line-height:1.7;color:var(--text);
+  display:none;
+}
+.ai-bubble.show{display:block}
+.ai-bubble-title{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--purple);margin-bottom:6px}
+.ai-loading{display:flex;align-items:center;gap:8px;color:var(--t3);font-size:13px}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--purple);animation:bounce .8s infinite}
+.ai-dot:nth-child(2){animation-delay:.15s}
+.ai-dot:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.streak-fire{font-size:32px;animation:fireShake .5s ease}
+@keyframes fireShake{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
+.level-up-banner{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:var(--gold-bg);border:2px solid var(--gold);border-radius:16px;
+  padding:24px 32px;text-align:center;z-index:1000;
+  animation:popIn .4s cubic-bezier(.4,0,.2,1)
+}
+@keyframes popIn{from{transform:translate(-50%,-50%) scale(.5);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
 </style>
 </head>
 <body>
@@ -747,17 +776,25 @@ function initSupabase() {
 async function init() {
   if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
     showScreen('auth');
-    document.getElementById('auth-err').textContent = '⚠️ Bitte Supabase-URL und Key in der HTML-Datei eintragen. Siehe Anleitung unten.';
+    document.getElementById('auth-err').textContent = '⚠️ Bitte Supabase-URL und Key eintragen.';
     return;
   }
   if (!initSupabase()) return;
-  const { data: { session } } = await sb.auth.getSession();
-  if (session?.user) {
-    currentUser = session.user;
-    await loadUserData();
-    showScreen('main');
-  } else {
+  const timeout = setTimeout(() => { showScreen('auth'); }, 6000);
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    clearTimeout(timeout);
+    if (session?.user) {
+      currentUser = session.user;
+      await loadUserData();
+      showScreen('main');
+    } else {
+      showScreen('auth');
+    }
+  } catch(e) {
+    clearTimeout(timeout);
     showScreen('auth');
+    document.getElementById('auth-err').textContent = '⚠️ Verbindungsfehler — bitte Seite neu laden.';
   }
 }
 
@@ -1017,7 +1054,12 @@ function renderVocabPhase() {
         ✓ Gewusst!<span>Kommt später</span>
       </button>
     </div>
-    <div style="font-size:12px;color:var(--t3);text-align:center;margin-top:6px">Kategorie: ${word.cat||'—'}</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px">
+      <span style="font-size:12px;color:var(--t3)">Kategorie: ${word.cat||'—'}</span>
+      <button class="ai-explain-btn" onclick="explainWord('${word.w}','${word.de}','ai-bubble-vocab')">🤖 KI erklärt</button>
+      <button style="background:none;border:none;font-size:16px;cursor:pointer" onclick="speakText('${word.w}')">🔊</button>
+    </div>
+    <div class="ai-bubble" id="ai-bubble-vocab"></div>
   `;
   vocabFlipped = false;
 }
@@ -1488,6 +1530,11 @@ function addSessionXP(n, icon='⭐') {
   pop.style.bottom = '30%';
   document.body.appendChild(pop);
   setTimeout(() => pop.remove(), 1000);
+  // Check level up preview
+  if (userProgress) {
+    const previewXP = (userProgress.xp_total||0) + sessionXP;
+    checkLevelUp(previewXP);
+  }
 }
 
 function confetti() {
@@ -1516,6 +1563,56 @@ function toast(msg) {
   t._t = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
+
+// ═══════════════════════════════════
+// AI WORD EXPLANATION (Claude API)
+// ═══════════════════════════════════
+async function explainWord(word, translation, containerId) {
+  const bubble = document.getElementById(containerId);
+  if (!bubble) return;
+  bubble.classList.add('show');
+  bubble.innerHTML = '<div class="ai-bubble-title">🤖 KI erklärt</div><div class="ai-loading"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div><span>Claude denkt nach…</span></div>';
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
+        messages: [{
+          role: 'user',
+          content: 'Erkläre mir das Business-Englisch Wort "' + word + '" (Deutsch: ' + translation + ') auf Deutsch in 2-3 Sätzen. Gib ein konkretes Beispiel aus dem Büroalltag. Antworte NUR mit der Erklärung, kein Präfix.'
+        }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content?.[0]?.text || 'Keine Erklärung verfügbar.';
+    bubble.innerHTML = '<div class="ai-bubble-title">🤖 KI erklärt: ' + word + '</div><div>' + text + '</div>';
+  } catch(e) {
+    bubble.innerHTML = '<div class="ai-bubble-title">🤖 KI erklärt</div><div>Tipp: "' + word + '" bedeutet auf Deutsch <b>' + translation + '</b>. Klicke 🔊 um die Aussprache zu hören!</div>';
+  }
+}
+
+// ═══════════════════════════════════
+// LEVEL UP ANIMATION
+// ═══════════════════════════════════
+let lastLevel = 1;
+function checkLevelUp(xp) {
+  const newLevel = getLevel(xp).num;
+  if (newLevel > lastLevel) {
+    lastLevel = newLevel;
+    showLevelUp(newLevel, getLevel(xp).title);
+  }
+}
+function showLevelUp(num, title) {
+  const banner = document.createElement('div');
+  banner.className = 'level-up-banner';
+  banner.innerHTML = '<div style="font-size:48px">🎖️</div><div style="font-size:22px;font-weight:800;color:var(--gold)">Level Up!</div><div style="font-size:16px;font-weight:700;margin:4px 0">Level ' + num + ' — ' + title + '</div><div style="font-size:13px;color:var(--t2)">Weiter so! 💪</div>';
+  document.body.appendChild(banner);
+  confetti();
+  setTimeout(() => banner.remove(), 3000);
+}
 // ═══════════════════════════════════
 // BOOT
 // ═══════════════════════════════════
