@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BizEnglish — Business English lernen</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg:#f4f1ea; --bg2:#ebe7dc; --bg3:#dedad0; --card:#fffefb;
+  --border:rgba(50,44,28,.13); --border2:rgba(50,44,28,.24);
+  --text:#1a1810; --t2:#6a6450; --t3:#9e9880;
+  --green:#2a5c3e; --green-bg:#e8f2ed; --green-light:#d0e8da;
+  --red:#b83030; --red-bg:#fdeaea;
+  --gold:#9a7418; --gold-bg:#fdf4d8; --gold-light:#f5e49a;
+  --blue:#1a4a8a; --blue-bg:#e8eef8;
+  --purple:#5a2a9a; --purple-bg:#f0eafc;
+  --orange:#c05818; --orange-bg:#fdf0e4;
+  --r:12px; --rsm:7px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#181714; --bg2:#201e19; --bg3:#28261f; --card:#1e1c17;
+  --border:rgba(255,248,220,.09); --border2:rgba(255,248,220,.18);
+  --text:#f0ecdf; --t2:#9e9878; --t3:#6b6550;
+  --green:#52c47a; --green-bg:#132318; --green-light:#1e3828;
+  --red:#e06060; --red-bg:#2a1414;
+  --gold:#d4a830; --gold-bg:#221a04; --gold-light:#3a2e08;
+  --blue:#6a9ae0; --blue-bg:#0e1a2e;
+  --purple:#a070e0; --purple-bg:#180e28;
+  --orange:#e8904a; --orange-bg:#261408;
+}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app{max-width:700px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+
+/* ── SCREENS ── */
+.screen{display:none;flex:1;flex-direction:column}
+.screen.active{display:flex}
+
+/* ── AUTH SCREEN ── */
+.auth-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px}
+.auth-logo{font-size:48px;margin-bottom:12px}
+.auth-title{font-size:28px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px}
+.auth-sub{font-size:14px;color:var(--t2);margin-bottom:32px;text-align:center}
+.auth-box{width:100%;max-width:380px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px}
+.auth-tabs{display:flex;border:1px solid var(--border2);border-radius:var(--rsm);overflow:hidden;margin-bottom:20px}
+.auth-tabs button{flex:1;padding:9px;font-family:inherit;font-size:13px;font-weight:600;background:none;border:none;color:var(--t2);cursor:pointer;transition:.15s}
+.auth-tabs button.active{background:var(--green);color:#fff}
+.auth-err{font-size:12px;color:var(--red);margin-top:8px;min-height:18px}
+
+/* ── FIELD ── */
+.field{margin-bottom:14px}
+label{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--t2);display:block;margin-bottom:5px}
+input[type=text],input[type=email],input[type=password],textarea,select{
+  width:100%;padding:10px 13px;font-family:inherit;font-size:14px;
+  background:var(--bg2);color:var(--text);border:1px solid var(--border2);
+  border-radius:var(--rsm);outline:none;transition:border-color .15s;resize:vertical
+}
+input:focus,textarea:focus,select:focus{border-color:var(--green)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:10px 18px;font-family:inherit;font-size:13px;font-weight:600;
+  border-radius:var(--rsm);border:1px solid var(--border2);background:var(--bg2);
+  color:var(--text);cursor:pointer;transition:all .12s;text-decoration:none;white-space:nowrap}
+.btn:hover{background:var(--bg3)}
+.btn-green{background:var(--green);color:#fff;border-color:transparent}
+.btn-green:hover{opacity:.88}
+.btn-red{background:var(--red-bg);color:var(--red);border-color:var(--red)}
+.btn-gold{background:var(--gold-bg);color:var(--gold);border-color:var(--gold)}
+.btn-full{width:100%}
+.btn-lg{padding:14px 24px;font-size:15px;border-radius:10px}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ── HEADER ── */
+.topbar{
+  display:flex;align-items:center;gap:10px;padding:14px 20px 10px;
+  background:var(--card);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:20
+}
+.topbar-logo{font-size:22px;font-weight:800;letter-spacing:-.03em;flex:1}
+.xp-chip{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;
+  background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold)}
+.streak-chip{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;
+  background:var(--orange-bg);color:var(--orange)}
+.avatar-btn{width:32px;height:32px;border-radius:50%;background:var(--green);
+  border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+
+/* ── XP BAR ── */
+.xpbar-row{padding:6px 20px 8px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.xpbar-track{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.xpbar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--gold));transition:width .5s cubic-bezier(.4,0,.2,1);width:0%}
+.xpbar-label{font-size:11px;color:var(--t3);white-space:nowrap}
+
+/* ── NAV ── */
+.bottomnav{
+  display:flex;background:var(--card);border-top:1px solid var(--border);
+  position:sticky;bottom:0;z-index:20
+}
+.bottomnav button{
+  flex:1;padding:10px 4px 8px;font-family:inherit;font-size:10px;font-weight:600;
+  letter-spacing:.04em;text-transform:uppercase;background:none;border:none;
+  border-top:2px solid transparent;color:var(--t3);cursor:pointer;transition:.15s
+}
+.bottomnav button.active{color:var(--green);border-top-color:var(--green)}
+.bottomnav button .ni{display:block;font-size:18px;margin-bottom:2px}
+
+/* ── CONTENT AREA ── */
+.content{flex:1;overflow-y:auto;padding:20px}
+
+/* ── HOME SCREEN ── */
+.session-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:24px;margin-bottom:16px;position:relative;overflow:hidden
+}
+.session-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--green),var(--gold))
+}
+.session-title{font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
+.session-sub{font-size:13px;color:var(--t2);margin-bottom:18px;line-height:1.5}
+.session-steps{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+.step-pill{
+  font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;
+  background:var(--bg2);color:var(--t2);border:1px solid var(--border)
+}
+.step-pill.done{background:var(--green-bg);color:var(--green);border-color:var(--green-light)}
+.step-pill.active{background:var(--gold-bg);color:var(--gold);border-color:var(--gold-light)}
+
+/* Stats row on home */
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center}
+.stat-n{font-size:26px;font-weight:800;line-height:1}
+.stat-l{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-top:4px}
+
+/* ── SESSION SCREEN ── */
+.session-wrap{flex:1;display:flex;flex-direction:column}
+.session-header{
+  padding:14px 20px;background:var(--card);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px
+}
+.session-progress-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.session-progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--gold));transition:width .4s}
+.session-close{background:none;border:1px solid var(--border2);border-radius:6px;padding:5px 10px;font-family:inherit;font-size:12px;color:var(--t2);cursor:pointer}
+.session-step-label{font-size:12px;font-weight:700;color:var(--t2);white-space:nowrap}
+
+.step-area{flex:1;padding:20px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+
+/* ── FLASH CARD (VOCAB) ── */
+.fc-wrap{perspective:1000px;min-height:200px;cursor:pointer}
+.fc-inner{position:relative;width:100%;min-height:200px;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1)}
+.fc-wrap.flipped .fc-inner{transform:rotateY(180deg)}
+.fc-face{
+  position:absolute;inset:0;backface-visibility:hidden;
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;text-align:center;min-height:200px
+}
+.fc-back{transform:rotateY(180deg)}
+.fc-word{font-size:38px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
+.fc-phon{font-size:13px;color:var(--t2);font-style:italic;margin-bottom:8px}
+.fc-hint{font-size:12px;color:var(--t3);margin-top:10px}
+.fc-de{font-size:24px;font-weight:700;color:var(--green);margin-bottom:10px}
+.fc-ex{font-family:'Lora',serif;font-size:13px;color:var(--t2);font-style:italic;line-height:1.7}
+
+/* SRS dots */
+.srs-dots{display:flex;gap:5px;margin-top:14px;justify-content:center}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--border2)}
+.dot.learn{background:var(--green)}
+.dot.master{background:var(--gold)}
+
+/* SRS buttons */
+.srs-btns{display:none;gap:10px}
+.srs-btns.show{display:flex}
+.srs-btn{
+  flex:1;padding:16px 8px;font-family:inherit;font-size:14px;font-weight:700;
+  border-radius:10px;border:2px solid transparent;cursor:pointer;transition:all .15s;
+  display:flex;flex-direction:column;align-items:center;gap:3px
+}
+.srs-btn span{font-size:10px;font-weight:500;opacity:.75}
+.srs-knew{background:var(--green-bg);color:var(--green);border-color:var(--green)}
+.srs-knew:hover{background:var(--green);color:#fff;transform:scale(1.02)}
+.srs-notknew{background:var(--red-bg);color:var(--red);border-color:var(--red)}
+.srs-notknew:hover{background:var(--red);color:#fff;transform:scale(1.02)}
+
+/* "I know it" early button (before flip) */
+.srs-early{
+  position:absolute;top:12px;right:12px;
+  background:var(--green-bg);color:var(--green);border:1px solid var(--green-light);
+  border-radius:20px;padding:5px 12px;font-family:inherit;font-size:11px;font-weight:700;
+  cursor:pointer;z-index:5;transition:all .15s
+}
+.srs-early:hover{background:var(--green);color:#fff}
+
+/* Queue badge */
+.queue-badge{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:12px;color:var(--t3)
+}
+.due-chip{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--orange-bg);color:var(--orange)}
+
+/* ── READING ── */
+.read-img{width:100%;height:180px;object-fit:cover;border-radius:var(--r);margin-bottom:14px;background:var(--bg3)}
+.read-text{font-family:'Lora',serif;font-size:15px;line-height:1.9;color:var(--text);margin-bottom:16px}
+.kw{background:var(--gold-bg);color:var(--gold);border-radius:3px;padding:1px 5px;
+    cursor:pointer;border-bottom:1px dashed var(--gold);font-style:normal}
+.kw:hover{opacity:.8}
+.rq-btn{
+  width:100%;text-align:left;padding:12px 16px;background:var(--bg2);
+  border:1px solid var(--border);border-radius:var(--rsm);font-family:inherit;
+  font-size:14px;color:var(--text);cursor:pointer;transition:all .12s;margin-bottom:8px
+}
+.rq-btn:hover:not(:disabled){border-color:var(--border2);background:var(--bg3)}
+.rq-btn.correct{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.rq-btn.wrong{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.add-to-vocab-btn{
+  display:inline-flex;align-items:center;gap:5px;padding:4px 10px;
+  background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue);
+  border-radius:20px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;
+  transition:.12s;margin-left:6px
+}
+.add-to-vocab-btn:hover{background:var(--blue);color:#fff}
+.add-to-vocab-btn.added{background:var(--green-bg);color:var(--green);border-color:var(--green);pointer-events:none}
+
+/* ── GRAMMAR ── */
+.grammar-rule{border-left:3px solid var(--green);padding:12px 16px;background:var(--green-bg);border-radius:0 var(--rsm) var(--rsm) 0;margin-bottom:14px}
+.grammar-rule-title{font-size:14px;font-weight:700;color:var(--green);margin-bottom:4px}
+.grammar-rule-body{font-size:13px;color:var(--t2);line-height:1.6}
+.fill-line{font-size:14px;line-height:2.6;margin-bottom:6px}
+.fill-inp{display:inline-block;min-width:110px;padding:3px 10px;font-size:13px;
+  background:var(--bg2);color:var(--text);border:1px solid var(--border2);
+  border-radius:5px;outline:none;transition:.15s;font-family:inherit}
+.fill-inp:focus{border-color:var(--green)}
+.fill-inp.ok{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.fill-inp.err{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+
+/* ── LISTENING ── */
+.listen-player{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:14px}
+.listen-phrase{font-size:18px;font-weight:700;margin-bottom:8px;display:none}
+.listen-controls{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.play-btn{width:56px;height:56px;border-radius:50%;background:var(--green);border:none;color:#fff;font-size:22px;cursor:pointer;transition:.15s}
+.play-btn:hover{opacity:.85}
+.listen-hint{font-size:12px;color:var(--t3);margin-top:8px}
+
+/* ── DONE SCREEN ── */
+.done-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center}
+.done-emoji{font-size:64px;margin-bottom:12px;animation:pop .4s cubic-bezier(.4,0,.2,1)}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.done-title{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
+.done-sub{font-size:14px;color:var(--t2);margin-bottom:24px;line-height:1.6}
+.done-xp{font-size:40px;font-weight:800;color:var(--gold);margin-bottom:8px}
+.done-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:340px;margin-bottom:24px}
+.done-stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.done-stat .n{font-size:24px;font-weight:800}
+.done-stat .l{font-size:11px;color:var(--t3);margin-top:2px}
+
+/* ── DICTIONARY SCREEN ── */
+.dict-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:14px}
+.dict-tabs button{flex:1;padding:10px;font-family:inherit;font-size:12px;font-weight:700;
+  background:none;border:none;border-bottom:2px solid transparent;color:var(--t3);cursor:pointer;transition:.15s}
+.dict-tabs button.active{color:var(--text);border-bottom-color:var(--green)}
+.dict-entry{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--rsm);margin-bottom:7px}
+.dict-word{font-size:15px;font-weight:700;flex:1}
+.dict-de{font-size:12px;color:var(--t2)}
+.dict-status{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.ds-new{background:var(--bg2);color:var(--t3)}
+.ds-learn{background:var(--orange-bg);color:var(--orange)}
+.ds-master{background:var(--green-bg);color:var(--green)}
+.ds-struggle{background:var(--red-bg);color:var(--red)}
+.dict-search{margin-bottom:12px}
+
+/* ── HISTORY SCREEN ── */
+.hist-entry{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:8px}
+.hist-date{font-size:11px;color:var(--t3);margin-bottom:6px}
+.hist-pills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
+.hist-pill{font-size:11px;padding:3px 8px;border-radius:20px;background:var(--bg2);color:var(--t2)}
+.hist-xp{font-size:16px;font-weight:800;color:var(--gold)}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(14px);
+  background:var(--text);color:var(--bg);padding:9px 22px;border-radius:24px;
+  font-size:13px;font-weight:600;opacity:0;pointer-events:none;
+  transition:all .28s cubic-bezier(.4,0,.2,1);z-index:999;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── XP POP ── */
+.xp-pop{position:fixed;font-size:18px;font-weight:800;color:var(--gold);
+  pointer-events:none;z-index:999;animation:floatUp .9s ease forwards}
+@keyframes floatUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-50px)}}
+
+/* ── LEVEL BADGE ── */
+.level-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+  border-radius:20px;background:var(--purple-bg);color:var(--purple);font-size:11px;font-weight:700;border:1px solid var(--purple)}
+
+/* Loading */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  flex:1;gap:12px;color:var(--t2);font-size:14px}
+.spinner{width:32px;height:32px;border:3px solid var(--border2);border-top-color:var(--green);
+  border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Slide animate */
+@keyframes slideIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+.slide-in{animation:slideIn .25s ease}
+
+/* Confetti burst (CSS only) */
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:998}
+.confetti span{position:absolute;width:8px;height:8px;border-radius:2px;animation:conffall 1.2s ease forwards}
+@keyframes conffall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(100vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="loading active screen" id="screen-loading">
+    <div class="spinner"></div>
+    <span>Lade BizEnglish…</span>
+  </div>
+
+  <!-- ══ AUTH ══ -->
+  <div class="screen" id="screen-auth">
+    <div class="auth-wrap">
+      <div class="auth-logo">💼</div>
+      <div class="auth-title">BizEnglish</div>
+      <div class="auth-sub">Business English lernen — wann und wo du willst</div>
+      <div class="auth-box">
+        <div class="auth-tabs">
+          <button class="active" id="tab-login" onclick="authTab('login')">Einloggen</button>
+          <button id="tab-register" onclick="authTab('register')">Registrieren</button>
+        </div>
+        <div class="field"><label>E-Mail</label><input type="email" id="auth-email" placeholder="deine@email.de"></div>
+        <div class="field"><label>Passwort</label><input type="password" id="auth-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAuth()"></div>
+        <div id="auth-err" class="auth-err"></div>
+        <button class="btn btn-green btn-full btn-lg" onclick="doAuth()" style="margin-top:8px" id="auth-submit-btn">Einloggen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MAIN APP ══ -->
+  <div class="screen" id="screen-main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-logo">💼 BizEnglish</div>
+      <span class="streak-chip" id="top-streak">🔥 0</span>
+      <span class="xp-chip" id="top-xp">0 XP</span>
+      <button class="avatar-btn" id="avatar-btn" onclick="showLogoutMenu()">?</button>
+    </div>
+    <div class="xpbar-row">
+      <span class="xpbar-label" id="xp-lbl">Level 1</span>
+      <div class="xpbar-track"><div class="xpbar-fill" id="xp-fill"></div></div>
+      <span class="xpbar-label" id="xp-next-lbl">0/100 XP</span>
+    </div>
+
+    <!-- Sub-screens -->
+    <div class="content" id="content-home" style="display:block">
+      <!-- HOME -->
+      <div id="home-view">
+        <div style="margin-bottom:16px;margin-top:4px">
+          <div class="level-badge" id="home-level">⭐ Level 1 — Anfänger</div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-n" id="hs-streak">0</div><div class="stat-l">🔥 Streak</div></div>
+          <div class="stat-box"><div class="stat-n" id="hs-words">0</div><div class="stat-l">📖 Gelernt</div></div>
+          <div class="stat-box"><div class="stat-n" id="hs-sessions">0</div><div class="stat-l">✅ Sessions</div></div>
+        </div>
+        <div class="session-card" id="session-start-card">
+          <div class="session-title">Heutige Session starten 🚀</div>
+          <div class="session-sub">~10 Minuten · Vokabeln, Lesen, Grammatik, Hören</div>
+          <div class="session-steps" id="session-steps-preview"></div>
+          <button class="btn btn-green btn-full btn-lg" onclick="startSession()">Session starten ▶</button>
+        </div>
+        <div id="due-card" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="content" id="content-dict" style="display:none">
+      <!-- DICTIONARY -->
+      <p style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:12px">Mein Wörterbuch</p>
+      <div class="dict-tabs">
+        <button class="active" onclick="dictTab('all',this)">Alle</button>
+        <button onclick="dictTab('due',this)">Fällig</button>
+        <button onclick="dictTab('master',this)">Gemeistert ⭐</button>
+        <button onclick="dictTab('struggle',this)">Schwierig 🔴</button>
+        <button onclick="dictTab('new',this)">Neu 🆕</button>
+      </div>
+      <div class="dict-search field"><input type="text" id="dict-search" placeholder="Wort suchen…" oninput="renderDict()"></div>
+      <div id="dict-list"></div>
+    </div>
+
+    <div class="content" id="content-history" style="display:none">
+      <!-- HISTORY -->
+      <p style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:12px">Session-Historie</p>
+      <div id="history-list"></div>
+    </div>
+
+    <!-- Bottom nav -->
+    <div class="bottomnav">
+      <button class="active" onclick="mainTab('home',this)"><span class="ni">🏠</span>Home</button>
+      <button onclick="mainTab('dict',this)"><span class="ni">📖</span>Wörterbuch</button>
+      <button onclick="mainTab('history',this)"><span class="ni">📊</span>Historie</button>
+    </div>
+  </div>
+
+  <!-- ══ SESSION SCREEN ══ -->
+  <div class="screen" id="screen-session">
+    <div class="session-header">
+      <span class="session-step-label" id="sess-step-label">Vokabeln</span>
+      <div class="session-progress-track"><div class="session-progress-fill" id="sess-prog"></div></div>
+      <button class="session-close" onclick="confirmCloseSession()">✕ Beenden</button>
+    </div>
+    <div class="step-area" id="step-area"></div>
+  </div>
+
+  <!-- ══ SESSION DONE ══ -->
+  <div class="screen" id="screen-done">
+    <div class="done-wrap">
+      <div class="done-emoji">🏆</div>
+      <div class="done-title">Session abgeschlossen!</div>
+      <div class="done-sub" id="done-sub">Fantastische Arbeit heute!</div>
+      <div class="done-xp" id="done-xp">+0 XP</div>
+      <div class="done-stats" id="done-stats"></div>
+      <button class="btn btn-green btn-lg" onclick="endSession()">Weiter →</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════
+// CONFIG — PASTE YOUR SUPABASE KEYS HERE
+// ═══════════════════════════════════
+const SUPABASE_URL = 'https://eopsiukvwkcoslwqtxlj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Bf5oE8RYQq-ao3-POYJPpA_C7gGqdPu';
+
+// ═══════════════════════════════════
+// 300+ BUSINESS VOCABULARY
+// ═══════════════════════════════════
+const VOCAB = [
+  // Meetings & Communication
+  {w:'agenda',ph:'/əˈdʒendə/',de:'Tagesordnung',ex:'"Please review the agenda before the meeting."',cat:'meetings'},
+  {w:'minutes',ph:'/ˈmɪnɪts/',de:'Protokoll (Besprechung)',ex:'"Who will take the minutes today?"',cat:'meetings'},
+  {w:'brief',ph:'/briːf/',de:'kurz informieren / Briefing',ex:'"Let me brief you on the latest developments."',cat:'meetings'},
+  {w:'adjourn',ph:'/əˈdʒɜːn/',de:'vertagen / beenden',ex:'"The meeting was adjourned until next Friday."',cat:'meetings'},
+  {w:'chairperson',ph:'/ˈtʃeəˌpɜːsən/',de:'Vorsitzende(r)',ex:'"The chairperson opened the meeting at 9am."',cat:'meetings'},
+  {w:'follow up',ph:'/ˈfɒləʊ ʌp/',de:'nachfassen / Nachverfolgung',ex:'"I will follow up with the client tomorrow."',cat:'meetings'},
+  {w:'action items',ph:'/ˈækʃən ˈaɪtəmz/',de:'Aufgabenpunkte',ex:'"Let\'s list the action items from today\'s meeting."',cat:'meetings'},
+  {w:'consensus',ph:'/kənˈsensəs/',de:'Einigkeit / Konsens',ex:'"We reached a consensus on the new policy."',cat:'meetings'},
+  {w:'clarify',ph:'/ˈklærɪfaɪ/',de:'klarstellen / erläutern',ex:'"Could you clarify what you mean by that?"',cat:'meetings'},
+  {w:'delegate',ph:'/ˈdelɪɡeɪt/',de:'delegieren / Delegierter',ex:'"She delegates tasks effectively to her team."',cat:'meetings'},
+
+  // Finance
+  {w:'revenue',ph:'/ˈrevənjuː/',de:'Umsatz / Einnahmen',ex:'"Revenue increased by 20% this quarter."',cat:'finance'},
+  {w:'profit margin',ph:'/ˈprɒfɪt ˈmɑːdʒɪn/',de:'Gewinnspanne',ex:'"Our profit margin has improved significantly."',cat:'finance'},
+  {w:'budget',ph:'/ˈbʌdʒɪt/',de:'Budget / Haushaltsplan',ex:'"We need to stay within the project budget."',cat:'finance'},
+  {w:'forecast',ph:'/ˈfɔːkɑːst/',de:'Prognose / Vorhersage',ex:'"The sales forecast for Q3 looks positive."',cat:'finance'},
+  {w:'invoice',ph:'/ˈɪnvɔɪs/',de:'Rechnung / Faktura',ex:'"Please send the invoice to our accounts department."',cat:'finance'},
+  {w:'cash flow',ph:'/kæʃ fləʊ/',de:'Liquidität / Geldfluss',ex:'"Positive cash flow is essential for growth."',cat:'finance'},
+  {w:'overhead',ph:'/ˈəʊvəhed/',de:'Gemeinkosten',ex:'"We must reduce overhead to increase profitability."',cat:'finance'},
+  {w:'equity',ph:'/ˈekwɪti/',de:'Eigenkapital',ex:'"The company raised equity through a public offering."',cat:'finance'},
+  {w:'liability',ph:'/ˌlaɪəˈbɪlɪti/',de:'Verbindlichkeit / Haftung',ex:'"All liabilities must be disclosed in the report."',cat:'finance'},
+  {w:'asset',ph:'/ˈæset/',de:'Vermögenswert / Anlage',ex:'"The building is our most valuable asset."',cat:'finance'},
+  {w:'depreciation',ph:'/dɪˌpriːʃiˈeɪʃən/',de:'Abschreibung',ex:'"Annual depreciation reduces our tax burden."',cat:'finance'},
+  {w:'quarterly',ph:'/ˈkwɔːtəli/',de:'vierteljährlich',ex:'"We publish quarterly earnings reports."',cat:'finance'},
+  {w:'audit',ph:'/ˈɔːdɪt/',de:'Prüfung / Revision',ex:'"The external audit found no irregularities."',cat:'finance'},
+  {w:'ROI',ph:'/ˌɑːr əʊ ˈaɪ/',de:'Kapitalrendite',ex:'"The ROI on this project exceeded expectations."',cat:'finance'},
+  {w:'venture capital',ph:'/ˈventʃə ˈkæpɪtəl/',de:'Risikokapital',ex:'"They secured venture capital to expand operations."',cat:'finance'},
+
+  // Strategy & Management
+  {w:'strategy',ph:'/ˈstrætədʒi/',de:'Strategie',ex:'"Our long-term strategy focuses on digital growth."',cat:'strategy'},
+  {w:'stakeholder',ph:'/ˈsteɪkˌhəʊldər/',de:'Interessenspartner',ex:'"All stakeholders must approve the final plan."',cat:'strategy'},
+  {w:'implement',ph:'/ˈɪmplɪment/',de:'umsetzen / implementieren',ex:'"We will implement the new CRM system next month."',cat:'strategy'},
+  {w:'benchmark',ph:'/ˈbentʃmɑːk/',de:'Maßstab / Vergleichswert',ex:'"Use industry benchmarks to evaluate performance."',cat:'strategy'},
+  {w:'KPI',ph:'/ˌkeɪ piː ˈaɪ/',de:'Leistungskennzahl',ex:'"Each department has its own set of KPIs."',cat:'strategy'},
+  {w:'scalable',ph:'/ˈskeɪləbəl/',de:'skalierbar',ex:'"We need a scalable solution for rapid growth."',cat:'strategy'},
+  {w:'synergy',ph:'/ˈsɪnədʒi/',de:'Synergie',ex:'"The merger created significant synergies."',cat:'strategy'},
+  {w:'pivot',ph:'/ˈpɪvət/',de:'umschwenken / Strategiewechsel',ex:'"The startup decided to pivot its business model."',cat:'strategy'},
+  {w:'disruptive',ph:'/dɪsˈrʌptɪv/',de:'disruptiv / bahnbrechend',ex:'"Their technology is truly disruptive."',cat:'strategy'},
+  {w:'competitive advantage',ph:'/kəmˈpetɪtɪv ədˈvɑːntɪdʒ/',de:'Wettbewerbsvorteil',ex:'"Quality is our main competitive advantage."',cat:'strategy'},
+  {w:'bottom line',ph:'/ˈbɒtəm laɪn/',de:'Fazit / Nettogewinn',ex:'"The bottom line is we need to cut costs."',cat:'strategy'},
+  {w:'core competency',ph:'/kɔː kɒmˈpɪtənsi/',de:'Kernkompetenz',ex:'"Innovation is a core competency of our company."',cat:'strategy'},
+  {w:'outsource',ph:'/ˈaʊtsɔːs/',de:'auslagern',ex:'"We outsource our IT support to save costs."',cat:'strategy'},
+  {w:'streamline',ph:'/ˈstriːmlaɪn/',de:'straffen / optimieren',ex:'"We need to streamline our approval process."',cat:'strategy'},
+
+  // Negotiations & Deals
+  {w:'negotiate',ph:'/nɪˈɡəʊʃieɪt/',de:'verhandeln',ex:'"We need to negotiate the contract terms carefully."',cat:'negotiations'},
+  {w:'proposal',ph:'/prəˈpəʊzəl/',de:'Angebot / Vorschlag',ex:'"Please review our proposal by Friday."',cat:'negotiations'},
+  {w:'contract',ph:'/ˈkɒntrækt/',de:'Vertrag',ex:'"Both parties signed the contract."',cat:'negotiations'},
+  {w:'terms and conditions',ph:'/tɜːmz ænd kənˈdɪʃənz/',de:'Geschäftsbedingungen',ex:'"Please read the terms and conditions carefully."',cat:'negotiations'},
+  {w:'deadline',ph:'/ˈdedlaɪn/',de:'Frist / Abgabetermin',ex:'"The project deadline is the end of this month."',cat:'negotiations'},
+  {w:'clause',ph:'/klɔːz/',de:'Klausel',ex:'"The penalty clause protects us from delays."',cat:'negotiations'},
+  {w:'compromise',ph:'/ˈkɒmprəmaɪz/',de:'Kompromiss',ex:'"We reached a fair compromise on pricing."',cat:'negotiations'},
+  {w:'counteroffer',ph:'/ˈkaʊntərˌɒfər/',de:'Gegenangebot',ex:'"They submitted a counteroffer within 24 hours."',cat:'negotiations'},
+  {w:'due diligence',ph:'/djuː ˈdɪlɪdʒəns/',de:'Sorgfaltspflicht',ex:'"Thorough due diligence is essential before any acquisition."',cat:'negotiations'},
+  {w:'leverage',ph:'/ˈliːvərɪdʒ/',de:'Einfluss / Hebel',ex:'"Our market position gives us strong leverage."',cat:'negotiations'},
+
+  // HR & People
+  {w:'onboarding',ph:'/ˈɒnˌbɔːdɪŋ/',de:'Einarbeitung',ex:'"The onboarding process takes two weeks."',cat:'hr'},
+  {w:'performance review',ph:'/pəˈfɔːməns rɪˈvjuː/',de:'Leistungsbeurteilung',ex:'"Annual performance reviews are in December."',cat:'hr'},
+  {w:'headcount',ph:'/ˈhedkaʊnt/',de:'Mitarbeiterzahl',ex:'"We plan to increase headcount by 15% next year."',cat:'hr'},
+  {w:'redundancy',ph:'/rɪˈdʌndənsi/',de:'Entlassung / Stellenabbau',ex:'"The restructuring resulted in 50 redundancies."',cat:'hr'},
+  {w:'retain',ph:'/rɪˈteɪn/',de:'halten / behalten',ex:'"It\'s crucial to retain top talent."',cat:'hr'},
+  {w:'workforce',ph:'/ˈwɜːkfɔːs/',de:'Belegschaft / Arbeitskräfte',ex:'"We have a skilled and diverse workforce."',cat:'hr'},
+  {w:'incentive',ph:'/ɪnˈsentɪv/',de:'Anreiz / Bonus',ex:'"Performance incentives motivate our team."',cat:'hr'},
+  {w:'appraisal',ph:'/əˈpreɪzəl/',de:'Bewertung / Beurteilung',ex:'"Her appraisal was outstanding this year."',cat:'hr'},
+  {w:'probation',ph:'/prəˈbeɪʃən/',de:'Probezeit',ex:'"New employees are on probation for 3 months."',cat:'hr'},
+  {w:'succession planning',ph:'/səkˈseʃən ˈplænɪŋ/',de:'Nachfolgeplanung',ex:'"Good succession planning ensures business continuity."',cat:'hr'},
+
+  // Marketing & Sales
+  {w:'target audience',ph:'/ˈtɑːɡɪt ˈɔːdiəns/',de:'Zielgruppe',ex:'"We need to define our target audience first."',cat:'marketing'},
+  {w:'brand awareness',ph:'/brænd əˈweənəs/',de:'Markenbekanntheit',ex:'"The campaign increased brand awareness by 40%."',cat:'marketing'},
+  {w:'conversion rate',ph:'/kənˈvɜːʃən reɪt/',de:'Konversionsrate',ex:'"Our conversion rate improved after the website redesign."',cat:'marketing'},
+  {w:'lead generation',ph:'/liːd ˌdʒenəˈreɪʃən/',de:'Kundengewinnung',ex:'"Content marketing is effective for lead generation."',cat:'marketing'},
+  {w:'pitch',ph:'/pɪtʃ/',de:'Verkaufspräsentation',ex:'"Her pitch convinced the investors immediately."',cat:'marketing'},
+  {w:'USP',ph:'/ˌjuː es ˈpiː/',de:'Alleinstellungsmerkmal',ex:'"Our USP is outstanding customer service."',cat:'marketing'},
+  {w:'market share',ph:'/ˈmɑːkɪt ʃeə/',de:'Marktanteil',ex:'"We gained 5% market share this year."',cat:'marketing'},
+  {w:'churn rate',ph:'/tʃɜːn reɪt/',de:'Abwanderungsrate',ex:'"Reducing churn rate is our top priority."',cat:'marketing'},
+  {w:'upsell',ph:'/ˈʌpsel/',de:'Zusatzverkauf',ex:'"Train your sales team to upsell effectively."',cat:'marketing'},
+  {w:'testimonial',ph:'/ˌtestɪˈməʊniəl/',de:'Kundenbewertung / Referenz',ex:'"Client testimonials build trust with new customers."',cat:'marketing'},
+  {w:'campaign',ph:'/kæmˈpeɪn/',de:'Kampagne',ex:'"The marketing campaign was a huge success."',cat:'marketing'},
+
+  // Operations & Logistics
+  {w:'supply chain',ph:'/səˈplaɪ tʃeɪn/',de:'Lieferkette',ex:'"Global supply chains were disrupted in 2020."',cat:'operations'},
+  {w:'logistics',ph:'/ləˈdʒɪstɪks/',de:'Logistik',ex:'"Efficient logistics reduce delivery times."',cat:'operations'},
+  {w:'turnaround',ph:'/ˈtɜːnəraʊnd/',de:'Lieferzeit / Wende',ex:'"We guarantee a 24-hour turnaround on orders."',cat:'operations'},
+  {w:'bottleneck',ph:'/ˈbɒtəlnek/',de:'Engpass',ex:'"The approval process is the main bottleneck."',cat:'operations'},
+  {w:'capacity',ph:'/kəˈpæsɪti/',de:'Kapazität',ex:'"We are running at full production capacity."',cat:'operations'},
+  {w:'inventory',ph:'/ˈɪnvəntri/',de:'Lagerbestand',ex:'"Monitor inventory levels to avoid shortages."',cat:'operations'},
+  {w:'procurement',ph:'/prəˈkjʊəmənt/',de:'Beschaffung',ex:'"The procurement team found a cheaper supplier."',cat:'operations'},
+  {w:'vendor',ph:'/ˈvendər/',de:'Lieferant / Anbieter',ex:'"We evaluate all vendors before signing contracts."',cat:'operations'},
+  {w:'compliance',ph:'/kəmˈplaɪəns/',de:'Regelkonformität',ex:'"All operations must meet compliance standards."',cat:'operations'},
+  {w:'quality assurance',ph:'/ˈkwɒlɪti əˈʃʊərəns/',de:'Qualitätssicherung',ex:'"Quality assurance checks happen at every stage."',cat:'operations'},
+
+  // Email & Professional Communication
+  {w:'attached',ph:'/əˈtætʃt/',de:'beigefügt / im Anhang',ex:'"Please find the report attached to this email."',cat:'email'},
+  {w:'regarding',ph:'/rɪˈɡɑːdɪŋ/',de:'bezüglich / betreffend',ex:'"I am writing regarding your recent inquiry."',cat:'email'},
+  {w:'as per',ph:'/æz pɜː/',de:'gemäß / wie vereinbart',ex:'"As per our discussion, here are the documents."',cat:'email'},
+  {w:'at your earliest convenience',ph:'',de:'so früh wie möglich',ex:'"Please respond at your earliest convenience."',cat:'email'},
+  {w:'sincerely',ph:'/sɪnˈsɪəli/',de:'mit freundlichen Grüßen',ex:'"Yours sincerely, Dr. James Wilson"',cat:'email'},
+  {w:'cc',ph:'/ˌsiː ˈsiː/',de:'in Kopie',ex:'"I will cc you on the email to the client."',cat:'email'},
+  {w:'acknowledge',ph:'/əkˈnɒlɪdʒ/',de:'bestätigen / anerkennen',ex:'"Please acknowledge receipt of this document."',cat:'email'},
+  {w:'pending',ph:'/ˈpendɪŋ/',de:'ausstehend / in Bearbeitung',ex:'"Three approvals are still pending."',cat:'email'},
+  {w:'circulate',ph:'/ˈsɜːkjʊleɪt/',de:'verteilen / weiterleiten',ex:'"Please circulate the report to all managers."',cat:'email'},
+  {w:'revert',ph:'/rɪˈvɜːt/',de:'zurückmelden (Business-English)',ex:'"Please revert to me by end of day."',cat:'email'},
+
+  // Project Management
+  {w:'milestone',ph:'/ˈmaɪlstəʊn/',de:'Meilenstein',ex:'"We hit every milestone ahead of schedule."',cat:'projects'},
+  {w:'deliverable',ph:'/dɪˈlɪvərəbəl/',de:'Lieferobjekt / Ergebnis',ex:'"The main deliverable is the final report."',cat:'projects'},
+  {w:'scope creep',ph:'/skəʊp kriːp/',de:'Aufgabenerweiterung',ex:'"Scope creep is the enemy of project timelines."',cat:'projects'},
+  {w:'agile',ph:'/ˈædʒaɪl/',de:'agil (Projektmethode)',ex:'"We use agile methodology in all our projects."',cat:'projects'},
+  {w:'sprint',ph:'/sprɪnt/',de:'Sprint (Arbeitszyklus)',ex:'"This sprint focuses on the payment module."',cat:'projects'},
+  {w:'stakeholder buy-in',ph:'',de:'Zustimmung der Beteiligten',ex:'"Getting stakeholder buy-in early is critical."',cat:'projects'},
+  {w:'timeline',ph:'/ˈtaɪmlaɪn/',de:'Zeitplan',ex:'"The project timeline has shifted by two weeks."',cat:'projects'},
+  {w:'dependencies',ph:'/dɪˈpendənsiz/',de:'Abhängigkeiten',ex:'"Identify all task dependencies before starting."',cat:'projects'},
+  {w:'backlog',ph:'/ˈbæklɒɡ/',de:'Aufgabenrückstand',ex:'"The product backlog has 40 items."',cat:'projects'},
+  {w:'sign-off',ph:'/saɪn ɒf/',de:'Freigabe / Genehmigung',ex:'"We need client sign-off before launch."',cat:'projects'},
+
+  // Presentations
+  {w:'slide deck',ph:'/slaɪd dek/',de:'Präsentation / Folienset',ex:'"I will send you the slide deck after the meeting."',cat:'presentations'},
+  {w:'Q&A',ph:'/ˌkjuː ænd ˈeɪ/',de:'Fragen und Antworten',ex:'"We will have a Q&A session at the end."',cat:'presentations'},
+  {w:'takeaway',ph:'/ˈteɪkəweɪ/',de:'wesentliche Erkenntnis',ex:'"The main takeaway from today is cost reduction."',cat:'presentations'},
+  {w:'overview',ph:'/ˈəʊvəvjuː/',de:'Überblick',ex:'"Let me give you a brief overview of our findings."',cat:'presentations'},
+  {w:'in a nutshell',ph:'',de:'kurz gesagt / auf einen Blick',ex:'"In a nutshell, we need to act quickly."',cat:'presentations'},
+  {w:'handout',ph:'/ˈhændaʊt/',de:'Handzettel / Unterlagen',ex:'"I prepared handouts for everyone."',cat:'presentations'},
+  {w:'walk through',ph:'/wɔːk θruː/',de:'durchgehen / erläutern',ex:'"Let me walk you through the main points."',cat:'presentations'},
+
+  // Technology & Digital
+  {w:'cloud-based',ph:'/klaʊd beɪst/',de:'cloudbasiert',ex:'"Our software is fully cloud-based."',cat:'tech'},
+  {w:'cybersecurity',ph:'/ˌsaɪbəsɪˈkjʊərɪti/',de:'Cybersicherheit',ex:'"Cybersecurity is a top priority for the board."',cat:'tech'},
+  {w:'data-driven',ph:'/ˈdeɪtə ˌdrɪvən/',de:'datenbasiert',ex:'"We make data-driven decisions at every level."',cat:'tech'},
+  {w:'bandwidth',ph:'/ˈbændwɪdθ/',de:'Kapazität / Ressourcen',ex:'"Do we have the bandwidth to take on this project?"',cat:'tech'},
+  {w:'legacy system',ph:'/ˈleɡəsi ˈsɪstəm/',de:'Altsystem',ex:'"Migrating from legacy systems takes time."',cat:'tech'},
+  {w:'SaaS',ph:'/sæz/',de:'Software als Dienstleistung',ex:'"We moved to a SaaS model to reduce costs."',cat:'tech'},
+  {w:'integration',ph:'/ˌɪntɪˈɡreɪʃən/',de:'Integration / Verknüpfung',ex:'"The API integration took two weeks."',cat:'tech'},
+  {w:'automation',ph:'/ˌɔːtəˈmeɪʃən/',de:'Automatisierung',ex:'"Automation reduced processing time by 60%."',cat:'tech'},
+  {w:'scalability',ph:'/ˌskeɪləˈbɪlɪti/',de:'Skalierbarkeit',ex:'"Scalability is key when choosing a platform."',cat:'tech'},
+  {w:'uptime',ph:'/ˈʌptaɪm/',de:'Verfügbarkeit / Betriebszeit',ex:'"We guarantee 99.9% uptime for our services."',cat:'tech'},
+
+  // Corporate Structure
+  {w:'board of directors',ph:'/bɔːd əv dɪˈrektəz/',de:'Vorstand / Aufsichtsrat',ex:'"The board approved the merger unanimously."',cat:'corporate'},
+  {w:'subsidiary',ph:'/səbˈsɪdiəri/',de:'Tochtergesellschaft',ex:'"Our German subsidiary employs 200 people."',cat:'corporate'},
+  {w:'merger',ph:'/ˈmɜːdʒər/',de:'Fusion',ex:'"The merger created Europe\'s largest bank."',cat:'corporate'},
+  {w:'acquisition',ph:'/ˌækwɪˈzɪʃən/',de:'Übernahme / Akquisition',ex:'"The acquisition cost 2 billion euros."',cat:'corporate'},
+  {w:'joint venture',ph:'/dʒɔɪnt ˈventʃər/',de:'Gemeinschaftsunternehmen',ex:'"We formed a joint venture with our Asian partner."',cat:'corporate'},
+  {w:'IPO',ph:'/ˌaɪ piː ˈəʊ/',de:'Börsengang',ex:'"The company\'s IPO raised $500 million."',cat:'corporate'},
+  {w:'shareholder',ph:'/ˈʃeəˌhəʊldər/',de:'Aktionär / Anteilseigner',ex:'"Shareholders will vote at the annual meeting."',cat:'corporate'},
+  {w:'corporate governance',ph:'/ˈkɔːpərət ˈɡʌvənəns/',de:'Unternehmensführung',ex:'"Strong corporate governance builds investor trust."',cat:'corporate'},
+
+  // Useful Phrases
+  {w:'take the initiative',ph:'',de:'die Initiative ergreifen',ex:'"Don\'t wait — take the initiative on this project."',cat:'phrases'},
+  {w:'going forward',ph:'',de:'künftig / in Zukunft',ex:'"Going forward, all reports must be digital."',cat:'phrases'},
+  {w:'circle back',ph:'',de:'zurückkommen auf',ex:'"Let\'s circle back to this topic next week."',cat:'phrases'},
+  {w:'touch base',ph:'',de:'kurz sprechen / kontaktieren',ex:'"I\'ll touch base with you after the conference."',cat:'phrases'},
+  {w:'ballpark figure',ph:'/ˈbɔːlpɑːk ˈfɪɡər/',de:'grobe Schätzung',ex:'"Can you give me a ballpark figure for the costs?"',cat:'phrases'},
+  {w:'on the same page',ph:'',de:'einer Meinung sein',ex:'"Are we all on the same page about the plan?"',cat:'phrases'},
+  {w:'low-hanging fruit',ph:'',de:'einfache Möglichkeiten',ex:'"Let\'s focus on the low-hanging fruit first."',cat:'phrases'},
+  {w:'run it up the flagpole',ph:'',de:'zur Diskussion stellen',ex:'"Run it up the flagpole and see who salutes."',cat:'phrases'},
+  {w:'value proposition',ph:'/ˈvæljuː ˌprɒpəˈzɪʃən/',de:'Nutzenversprechen',ex:'"What\'s your value proposition for this market?"',cat:'phrases'},
+  {w:'pain point',ph:'/peɪn pɔɪnt/',de:'Schmerzpunkt / Problem',ex:'"What are the main pain points for our customers?"',cat:'phrases'},
+];
+
+// ═══════════════════════════════════
+// READING TEXTS
+// ═══════════════════════════════════
+const READINGS = [
+  {
+    title:"Remote Work Revolution",
+    img:"https://images.unsplash.com/photo-1587614382346-4ec70e388b28?w=700&q=80",
+    text:"The global shift to remote work has fundamentally changed how companies manage their workforce. Many businesses have adopted a hybrid model, combining office days with working from home. This approach requires strong digital infrastructure and a focus on employee well-being. Companies that invest in clear communication channels and regular virtual meetings tend to retain top talent more effectively.",
+    keywords:["workforce","hybrid","retain","infrastructure","communication"],
+    questions:[
+      {q:"What model do many companies now use?",opts:["Fully remote","Fully in-office","Hybrid model","No model"],ans:2,exp:"Many companies now use a hybrid model combining office and home."},
+      {q:"What helps companies retain top talent?",opts:["Higher salaries only","Clear communication and meetings","Bigger offices","Stricter rules"],ans:1,exp:"Strong communication and virtual meetings help retain talent."},
+    ],
+    vocabToAdd:["workforce","retain","hybrid"]
+  },
+  {
+    title:"Sustainability in Business",
+    img:"https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?w=700&q=80",
+    text:"Sustainability has moved from a nice-to-have to a core business strategy. Companies are under increasing pressure from stakeholders, investors, and regulators to reduce their carbon footprint and improve their supply chain transparency. Those who fail to address environmental concerns risk losing market share to more responsible competitors. The bottom line is clear: going green is good for business.",
+    keywords:["stakeholders","supply chain","market share","bottom line","strategy"],
+    questions:[
+      {q:"Who pressures companies to be more sustainable?",opts:["Only customers","Only governments","Stakeholders, investors and regulators","Only employees"],ans:2,exp:"Stakeholders, investors, AND regulators all apply pressure."},
+      {q:"What do companies risk by ignoring environmental concerns?",opts:["Higher profits","Losing market share","More staff","Better contracts"],ans:1,exp:"They risk losing market share to more responsible competitors."},
+    ],
+    vocabToAdd:["stakeholders","supply chain","market share","bottom line"]
+  },
+  {
+    title:"The Art of Negotiation",
+    img:"https://images.unsplash.com/photo-1521791136064-7986c2920216?w=700&q=80",
+    text:"Successful negotiation is not about winning at all costs — it is about reaching a compromise that both parties can accept. Skilled negotiators prepare thoroughly, know their leverage, and listen actively to understand the other side's pain points. A well-structured proposal that addresses the client's needs directly will always outperform an aggressive approach. Remember: the goal is a long-term relationship, not a one-time deal.",
+    keywords:["compromise","leverage","proposal","pain points","negotiate"],
+    questions:[
+      {q:"What is the goal of successful negotiation?",opts:["Winning at all costs","A one-time deal","A compromise both parties accept","The lowest price"],ans:2,exp:"Good negotiation aims for a compromise both sides can accept."},
+      {q:"What do skilled negotiators do to understand the other side?",opts:["Shout louder","Listen actively","Ignore concerns","Make threats"],ans:1,exp:"Active listening helps you understand the other party's pain points."},
+    ],
+    vocabToAdd:["compromise","leverage","proposal","pain points","negotiate"]
+  },
+  {
+    title:"Data-Driven Decision Making",
+    img:"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=700&q=80",
+    text:"Modern businesses increasingly rely on data analytics to guide their strategy. By tracking KPIs and conversion rates in real time, managers can identify bottlenecks and opportunities much faster than before. However, data alone is not enough — you need to interpret it correctly and act on the insights. Companies that combine strong data infrastructure with human judgment consistently outperform their competitors.",
+    keywords:["KPIs","conversion rate","bottlenecks","strategy","data-driven"],
+    questions:[
+      {q:"What can real-time KPI tracking help managers identify?",opts:["Employee moods","Bottlenecks and opportunities","Office locations","Email volume"],ans:1,exp:"Real-time KPI tracking helps identify bottlenecks and opportunities quickly."},
+      {q:"What must be combined with data for best results?",opts:["More data","Human judgment","Automation only","Luck"],ans:1,exp:"Combining data infrastructure with human judgment leads to outperformance."},
+    ],
+    vocabToAdd:["KPIs","conversion rate","bottlenecks","data-driven"]
+  },
+];
+
+// ═══════════════════════════════════
+// GRAMMAR LESSONS
+// ═══════════════════════════════════
+const GRAMMAR_LESSONS = [
+  {
+    title:"Present Perfect — Business Results",
+    rule:"Use <b>have/has + past participle</b> for results without a specific time.<br>✅ \"We <b>have increased</b> revenue.\" &nbsp;❌ \"We increased revenue yesterday.\" (→ simple past)",
+    fills:[
+      {before:"The team ",answer:"has completed",after:" the project on time.",hint:"complete"},
+      {before:"Sales ",answer:"have increased",after:" by 20% this year.",hint:"increase"},
+      {before:"She ",answer:"has sent",after:" the proposal to all clients.",hint:"send"},
+      {before:"Our profits ",answer:"have grown",after:" steadily for three years.",hint:"grow"},
+    ]
+  },
+  {
+    title:"Conditionals — Business Scenarios",
+    rule:"Use <b>If + present, will + infinitive</b> for likely future situations.<br>✅ \"If we <b>reduce</b> costs, we <b>will increase</b> our margin.\"",
+    fills:[
+      {before:"If we ",answer:"reduce",after:" overhead, margins will improve.",hint:"reduce"},
+      {before:"If the client agrees, we ",answer:"will sign",after:" next week.",hint:"will + sign"},
+      {before:"If you ",answer:"send",after:" the report now, I will review it today.",hint:"send"},
+      {before:"Sales will rise if we ",answer:"launch",after:" the campaign early.",hint:"launch"},
+    ]
+  },
+  {
+    title:"Passive Voice — Professional Reports",
+    rule:"Use <b>is/are/was/were + past participle</b> to focus on the action, not who did it.<br>✅ \"The report <b>was approved</b> by the board.\"",
+    fills:[
+      {before:"The contract ",answer:"was signed",after:" yesterday.",hint:"sign (passive past)"},
+      {before:"New procedures ",answer:"were implemented",after:" last quarter.",hint:"implement (passive past)"},
+      {before:"The budget ",answer:"is reviewed",after:" every six months.",hint:"review (passive present)"},
+      {before:"All employees ",answer:"are required",after:" to complete the training.",hint:"require (passive present)"},
+    ]
+  },
+  {
+    title:"Modal Verbs — Requests & Advice",
+    rule:"<b>Could</b> (polite request) · <b>Should</b> (advice) · <b>Must</b> (obligation)<br>✅ \"<b>Could</b> you send me the report?\" ✅ \"You <b>should</b> follow up.\"",
+    fills:[
+      {before:"",answer:"Could",after:" you schedule a meeting for Monday?",hint:"polite request"},
+      {before:"You ",answer:"should",after:" prepare a backup plan.",hint:"advice"},
+      {before:"All staff ",answer:"must",after:" complete the compliance training.",hint:"obligation"},
+      {before:"",answer:"Would",after:" you like me to send a summary?",hint:"polite offer"},
+    ]
+  },
+];
+
+// ═══════════════════════════════════
+// LISTENING EXERCISES
+// ═══════════════════════════════════
+const LISTENING = [
+  {
+    phrases:[
+      "Could you please send me the quarterly report by end of day?",
+      "We need to schedule a follow-up meeting with the stakeholders.",
+      "The proposal has been approved — we can move forward.",
+    ],
+    questions:[
+      {q:"What document is requested?",opts:["Monthly report","Quarterly report","Annual budget","Project plan"],ans:1},
+      {q:"Who needs to be involved in the meeting?",opts:["The board","The shareholders","The stakeholders","The vendors"],ans:2},
+    ]
+  },
+  {
+    phrases:[
+      "Our revenue grew by eighteen percent compared to last year.",
+      "The main bottleneck is the approval process — it takes too long.",
+      "We should streamline operations and outsource non-core activities.",
+    ],
+    questions:[
+      {q:"By how much did revenue grow?",opts:["8%","80%","18%","28%"],ans:2},
+      {q:"What should the company do with non-core activities?",opts:["Expand them","Eliminate them","Outsource them","Automate them"],ans:2},
+    ]
+  },
+];
+
+// ═══════════════════════════════════
+// SUPABASE INIT
+// ═══════════════════════════════════
+let sb, currentUser, userProgress, srsCards = {};
+let sessionXP = 0, sessionStartTime = 0;
+let sessionData = { vocabCorrect:0, vocabTotal:0, readingDone:false, grammarDone:false, listeningDone:false };
+
+function initSupabase() {
+  try {
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    return true;
+  } catch(e) {
+    showScreen('auth');
+    document.getElementById('auth-err').textContent = '⚠️ Supabase nicht konfiguriert. Bitte SUPABASE_URL und SUPABASE_KEY einsetzen.';
+    return false;
+  }
+}
+
+async function init() {
+  if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+    showScreen('auth');
+    document.getElementById('auth-err').textContent = '⚠️ Bitte Supabase-URL und Key in der HTML-Datei eintragen. Siehe Anleitung unten.';
+    return;
+  }
+  if (!initSupabase()) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) {
+    currentUser = session.user;
+    await loadUserData();
+    showScreen('main');
+  } else {
+    showScreen('auth');
+  }
+}
+
+// ═══════════════════════════════════
+// AUTH
+// ═══════════════════════════════════
+let authMode = 'login';
+function authTab(mode) {
+  authMode = mode;
+  document.getElementById('tab-login').classList.toggle('active', mode==='login');
+  document.getElementById('tab-register').classList.toggle('active', mode==='register');
+  document.getElementById('auth-submit-btn').textContent = mode==='login' ? 'Einloggen' : 'Account erstellen';
+  document.getElementById('auth-err').textContent = '';
+}
+async function doAuth() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pw    = document.getElementById('auth-pw').value;
+  const errEl = document.getElementById('auth-err');
+  if (!email || !pw) { errEl.textContent = 'Bitte E-Mail und Passwort eingeben.'; return; }
+  errEl.textContent = 'Bitte warten…';
+  let res;
+  if (authMode==='login') {
+    res = await sb.auth.signInWithPassword({ email, password: pw });
+  } else {
+    res = await sb.auth.signUp({ email, password: pw });
+  }
+  if (res.error) { errEl.textContent = '❌ ' + res.error.message; return; }
+  currentUser = res.data.user;
+  await loadUserData();
+  showScreen('main');
+}
+async function showLogoutMenu() {
+  if (confirm('Ausloggen?')) {
+    await sb.auth.signOut();
+    currentUser = null; userProgress = null; srsCards = {};
+    showScreen('auth');
+  }
+}
+
+// ═══════════════════════════════════
+// LOAD / SAVE USER DATA
+// ═══════════════════════════════════
+async function loadUserData() {
+  // Progress
+  const { data: prog } = await sb.from('user_progress').select('*').eq('user_id', currentUser.id).single();
+  userProgress = prog || { user_id: currentUser.id, xp_total:0, xp_today:0, streak:0, last_session_date:'', sessions_completed:0, quiz_correct:0, quiz_total:0 };
+  if (!prog) await sb.from('user_progress').insert(userProgress);
+
+  // SRS cards
+  const { data: cards } = await sb.from('srs_cards').select('*').eq('user_id', currentUser.id);
+  srsCards = {};
+  (cards||[]).forEach(c => { srsCards[c.word_key] = c; });
+
+  renderHome();
+}
+
+async function saveProgress() {
+  userProgress.updated_at = new Date().toISOString();
+  await sb.from('user_progress').upsert({ ...userProgress, user_id: currentUser.id });
+}
+
+async function saveSrsCard(wordKey, card) {
+  srsCards[wordKey] = card;
+  await sb.from('srs_cards').upsert({ ...card, user_id: currentUser.id, word_key: wordKey });
+}
+
+async function saveSessionHistory(data) {
+  await sb.from('session_history').insert({ ...data, user_id: currentUser.id });
+}
+
+// ═══════════════════════════════════
+// SCREENS
+// ═══════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+function mainTab(tab, btn) {
+  document.querySelectorAll('.bottomnav button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['home','dict','history'].forEach(t => {
+    document.getElementById('content-' + t).style.display = t===tab ? 'block' : 'none';
+  });
+  if (tab==='dict') renderDict();
+  if (tab==='history') renderHistory();
+}
+
+// ═══════════════════════════════════
+// HOME RENDER
+// ═══════════════════════════════════
+function renderHome() {
+  if (!userProgress) return;
+  const xp = userProgress.xp_total || 0;
+  const level = getLevel(xp);
+  document.getElementById('top-xp').textContent = xp + ' XP';
+  document.getElementById('top-streak').textContent = '🔥 ' + (userProgress.streak||0);
+  document.getElementById('hs-streak').textContent = userProgress.streak||0;
+  document.getElementById('hs-words').textContent = Object.values(srsCards).filter(c=>c.repetitions>0).length;
+  document.getElementById('hs-sessions').textContent = userProgress.sessions_completed||0;
+  document.getElementById('home-level').textContent = '⭐ Level ' + level.num + ' — ' + level.title;
+  document.getElementById('avatar-btn').textContent = (currentUser.email||'?')[0].toUpperCase();
+
+  const xpInLevel = xp - level.min;
+  const levelRange = level.max - level.min;
+  document.getElementById('xp-fill').style.width = Math.min(100, xpInLevel/levelRange*100) + '%';
+  document.getElementById('xp-lbl').textContent = 'Level ' + level.num;
+  document.getElementById('xp-next-lbl').textContent = xpInLevel + '/' + levelRange + ' XP';
+
+  // Due count
+  const now = Date.now();
+  const dueCount = VOCAB.filter((v,i) => {
+    const c = srsCards[v.w];
+    return !c || c.next_due <= now;
+  }).length;
+
+  const steps = ['📖 Vokabeln','📄 Lesen','✏️ Grammatik','🎧 Hören'];
+  const previewEl = document.getElementById('session-steps-preview');
+  previewEl.innerHTML = steps.map(s => `<span class="step-pill">${s}</span>`).join('');
+
+  const dueCard = document.getElementById('due-card');
+  if (dueCount > 0) {
+    dueCard.style.display = 'block';
+    dueCard.innerHTML = `<div style="font-size:13px;color:var(--t2);text-align:center;padding:8px 0">📚 <b>${dueCount}</b> Vokabeln heute fällig</div>`;
+  }
+}
+
+function getLevel(xp) {
+  const levels = [
+    {num:1,title:'Anfänger',min:0,max:200},
+    {num:2,title:'Grundkenntnisse',min:200,max:500},
+    {num:3,title:'Mittelstufe',min:500,max:1000},
+    {num:4,title:'Fortgeschritten',min:1000,max:2000},
+    {num:5,title:'Business-Profi',min:2000,max:4000},
+    {num:6,title:'Expert',min:4000,max:8000},
+    {num:7,title:'Master',min:8000,max:99999},
+  ];
+  return levels.find(l => xp >= l.min && xp < l.max) || levels[levels.length-1];
+}
+
+// ═══════════════════════════════════
+// SESSION ENGINE
+// ═══════════════════════════════════
+let sessionPhase = 0; // 0=vocab 1=reading 2=grammar 3=listening
+const PHASES = ['📖 Vokabeln','📄 Lesen','✏️ Grammatik','🎧 Hören'];
+let vocabQueue = [], vocabPos = 0, vocabFlipped = false;
+let readingIdx = 0, listeningIdx = 0, grammarIdx = 0;
+let vocabAdded = new Set(); // words added to dict from reading
+
+function startSession() {
+  sessionPhase = 0;
+  sessionXP = 0;
+  sessionStartTime = Date.now();
+  sessionData = { vocabCorrect:0, vocabTotal:0, readingDone:false, grammarDone:false, listeningDone:false };
+  vocabAdded = new Set();
+  readingIdx = Math.floor(Math.random() * READINGS.length);
+  grammarIdx = Math.floor(Math.random() * GRAMMAR_LESSONS.length);
+  listeningIdx = Math.floor(Math.random() * LISTENING.length);
+  buildVocabQueue();
+  showScreen('session');
+  renderPhase();
+}
+
+function buildVocabQueue() {
+  const now = Date.now();
+  let due = [], fresh = [];
+  VOCAB.forEach((v, i) => {
+    const c = srsCards[v.w];
+    if (!c || c.next_due <= now) due.push(i);
+    else fresh.push(i);
+  });
+  // Shuffle each group
+  due = due.sort(() => Math.random()-.5);
+  fresh = fresh.sort(() => Math.random()-.5);
+  // Take 15 for session (10 due + 5 fresh)
+  vocabQueue = [...due.slice(0,12), ...fresh.slice(0,8)];
+  vocabPos = 0;
+}
+
+function updateSessionProgress() {
+  const pct = (sessionPhase / PHASES.length) * 100;
+  document.getElementById('sess-prog').style.width = pct + '%';
+  document.getElementById('sess-step-label').textContent = PHASES[sessionPhase] || 'Fertig';
+}
+
+function renderPhase() {
+  updateSessionProgress();
+  if (sessionPhase === 0) renderVocabPhase();
+  else if (sessionPhase === 1) renderReadingPhase();
+  else if (sessionPhase === 2) renderGrammarPhase();
+  else if (sessionPhase === 3) renderListeningPhase();
+  else finishSession();
+}
+
+function nextPhase() {
+  sessionPhase++;
+  renderPhase();
+}
+
+function confirmCloseSession() {
+  if (confirm('Session wirklich beenden? Fortschritt wird gespeichert.')) endSession();
+}
+
+// ═══════════════════════════════════
+// PHASE 1: VOCAB
+// ═══════════════════════════════════
+function renderVocabPhase() {
+  const area = document.getElementById('step-area');
+  area.innerHTML = '';
+  if (vocabPos >= vocabQueue.length) {
+    // All done — show summary and next button
+    area.innerHTML = `
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-size:48px;margin-bottom:12px">📖</div>
+        <div style="font-size:20px;font-weight:800;margin-bottom:6px">Vokabeln abgeschlossen!</div>
+        <div style="font-size:14px;color:var(--t2);margin-bottom:20px">${sessionData.vocabCorrect} von ${sessionData.vocabTotal} gewusst</div>
+        <button class="btn btn-green btn-lg" onclick="nextPhase()">Weiter zum Lesen →</button>
+      </div>`;
+    return;
+  }
+
+  const wi = vocabQueue[vocabPos];
+  const word = VOCAB[wi];
+  const card = srsCards[word.w] || { word_key:word.w, interval_days:0, ease_factor:2.5, repetitions:0, next_due:0, last_seen:0, status:'new' };
+  const isNew = !srsCards[word.w] || card.repetitions === 0;
+  const remaining = vocabQueue.length - vocabPos;
+
+  // Dots
+  const dots = Array.from({length:5},(_,i)=>`<div class="dot${i<(card.repetitions||0)?(card.interval_days>=7?' master':' learn'):''}"></div>`).join('');
+
+  area.innerHTML = `
+    <div class="queue-badge">
+      <span>${vocabPos+1} / ${vocabQueue.length}</span>
+      <span class="due-chip">${remaining} übrig</span>
+    </div>
+    <div style="position:relative">
+      <div class="fc-wrap slide-in" id="fc" onclick="flipVocab()">
+        <div class="fc-inner">
+          <div class="fc-face">
+            <div class="fc-word">${word.w}</div>
+            <div class="fc-phon">${word.ph||''}</div>
+            <div class="fc-hint">${isNew ? '🆕 Neues Wort' : '🔄 Wiederholung'} — tippe um zu sehen ↩</div>
+            <div class="srs-dots">${dots}</div>
+          </div>
+          <div class="fc-face fc-back">
+            <div class="fc-de">${word.de}</div>
+            <div class="fc-ex">${word.ex||''}</div>
+          </div>
+        </div>
+      </div>
+      <button class="srs-early" id="early-btn" onclick="srsEarly(event)">✓ Kenne ich!</button>
+    </div>
+    <div class="srs-btns" id="srs-btns">
+      <button class="srs-btn srs-notknew" onclick="srsAnswer(false)">
+        ✗ Nicht gewusst<span>Kommt bald nochmal</span>
+      </button>
+      <button class="srs-btn srs-knew" onclick="srsAnswer(true)">
+        ✓ Gewusst!<span>Kommt später</span>
+      </button>
+    </div>
+    <div style="font-size:12px;color:var(--t3);text-align:center;margin-top:6px">Kategorie: ${word.cat||'—'}</div>
+  `;
+  vocabFlipped = false;
+}
+
+function flipVocab() {
+  if (vocabFlipped) return;
+  vocabFlipped = true;
+  document.getElementById('fc')?.classList.add('flipped');
+  document.getElementById('srs-btns')?.classList.add('show');
+  document.getElementById('early-btn')?.style.setProperty('display','none');
+}
+
+function srsEarly(e) {
+  e.stopPropagation();
+  srsAnswer(true, true);
+}
+
+async function srsAnswer(knew, wasEarly=false) {
+  const wi = vocabQueue[vocabPos];
+  const word = VOCAB[wi];
+  let card = srsCards[word.w] || { word_key:word.w, interval_days:0, ease_factor:2.5, repetitions:0, next_due:0, last_seen:0, status:'new' };
+
+  sessionData.vocabTotal++;
+  if (knew) sessionData.vocabCorrect++;
+
+  // SM-2 update
+  const quality = knew ? 4 : 1;
+  const now = Date.now();
+  if (quality < 3) {
+    card.repetitions = 0; card.interval_days = 0;
+    card.next_due = now + 5 * 60 * 1000; // 5 min
+    card.status = 'learning';
+    const insert = Math.min(vocabPos + 4, vocabQueue.length);
+    vocabQueue.splice(insert, 0, wi);
+  } else {
+    if (card.repetitions === 0)      card.interval_days = 1;
+    else if (card.repetitions === 1) card.interval_days = 3;
+    else card.interval_days = Math.round(card.interval_days * card.ease_factor);
+    card.repetitions++;
+    card.ease_factor = Math.max(1.3, card.ease_factor + 0.1 - (5-quality)*(0.08+(5-quality)*0.02));
+    card.next_due = now + card.interval_days * 24*60*60*1000;
+    card.status = card.interval_days >= 7 ? 'master' : 'learning';
+  }
+  card.last_seen = now;
+  await saveSrsCard(word.w, card);
+
+  const xpGain = knew ? (card.interval_days >= 7 ? 5 : 10) : 2;
+  addSessionXP(xpGain, knew ? '✅' : '📖');
+
+  vocabPos++;
+  renderVocabPhase();
+}
+
+// ═══════════════════════════════════
+// PHASE 2: READING
+// ═══════════════════════════════════
+let readAnswered = 0, readCorrect = 0;
+function renderReadingPhase() {
+  const art = READINGS[readingIdx];
+  const area = document.getElementById('step-area');
+  readAnswered = 0; readCorrect = 0;
+
+  let txt = art.text;
+  (art.keywords||[]).forEach(kw => {
+    const safe = kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    txt = txt.replace(new RegExp('('+safe+')','gi'), `<em class="kw">$1</em>`);
+  });
+
+  const vocabButtons = (art.vocabToAdd||[]).map(kw => {
+    const alreadyKnown = srsCards[kw] && srsCards[kw].repetitions > 0;
+    return `<button class="add-to-vocab-btn ${alreadyKnown?'added':''}" id="addv-${kw}" onclick="addWordFromReading('${kw}')">${alreadyKnown ? '✓ Im Wörterbuch' : '+ Zu Vokabeln'}</button>`;
+  });
+
+  const qHtml = art.questions.map((q,i) => `
+    <button class="rq-btn" id="rq-${i}" onclick="answerReadQ(${i},${q.ans},this,${JSON.stringify(q.opts).replace(/"/g,"'")},${JSON.stringify(q.exp).replace(/"/g,"'")})">${['A','B','C','D'][0]+') '+(q.opts[0])}</button>
+  `).join('');
+
+  area.innerHTML = `
+    <img src="${art.img}" alt="${art.title}" class="read-img" onerror="this.style.display='none'">
+    <div style="font-size:18px;font-weight:800;margin-bottom:10px">${art.title}</div>
+    <div class="read-text">${txt}</div>
+    <div style="margin-bottom:10px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">Wörter ins Wörterbuch übernehmen:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${vocabButtons.join('')}</div>
+    </div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin:14px 0 10px">Verständnisfragen</div>
+    <div id="rq-area"></div>
+    <div id="read-done" style="display:none;margin-top:14px">
+      <button class="btn btn-green btn-full btn-lg" onclick="nextPhase()">Weiter zur Grammatik →</button>
+    </div>
+  `;
+
+  // Build questions
+  const rqArea = document.getElementById('rq-area');
+  art.questions.forEach((q,qi) => {
+    const div = document.createElement('div');
+    div.style.marginBottom = '14px';
+    div.innerHTML = `<div style="font-size:14px;font-weight:600;margin-bottom:8px">❓ ${q.q}</div>`;
+    q.opts.forEach((opt, oi) => {
+      const b = document.createElement('button');
+      b.className = 'rq-btn';
+      b.textContent = ['A','B','C','D'][oi] + ') ' + opt;
+      b.onclick = () => answerReadQ(qi, oi, q.ans, b, div, q.exp, art.questions.length);
+      div.appendChild(b);
+    });
+    rqArea.appendChild(div);
+  });
+}
+
+function answerReadQ(qi, chosen, correct, btn, container, exp, total) {
+  container.querySelectorAll('.rq-btn').forEach(b => b.disabled = true);
+  if (chosen === correct) {
+    btn.classList.add('correct');
+    addSessionXP(15, '✅');
+    toast('Richtig! +15 XP 🎉');
+  } else {
+    btn.classList.add('wrong');
+    container.querySelectorAll('.rq-btn')[correct].classList.add('correct');
+    addSessionXP(5, '📖');
+  }
+  if (exp) {
+    const fb = document.createElement('div');
+    fb.style.cssText = 'font-size:13px;color:var(--t2);margin-top:8px;padding:8px 12px;background:var(--bg2);border-radius:6px';
+    fb.textContent = '💡 ' + exp;
+    container.appendChild(fb);
+  }
+  readAnswered++;
+  if (readAnswered >= total) {
+    sessionData.readingDone = true;
+    document.getElementById('read-done').style.display = 'block';
+  }
+}
+
+async function addWordFromReading(kw) {
+  const btn = document.getElementById('addv-'+kw);
+  if (!btn || btn.classList.contains('added')) return;
+  // Find in vocab
+  const vocabEntry = VOCAB.find(v => v.w.toLowerCase() === kw.toLowerCase());
+  if (vocabEntry && !srsCards[vocabEntry.w]) {
+    const card = { word_key:vocabEntry.w, interval_days:0, ease_factor:2.5, repetitions:0, next_due:0, last_seen:0, status:'new' };
+    await saveSrsCard(vocabEntry.w, card);
+  }
+  // Also add to upcoming vocab queue for next sessions
+  vocabAdded.add(kw);
+  btn.textContent = '✓ Hinzugefügt';
+  btn.classList.add('added');
+  toast('📖 "' + kw + '" zum Wörterbuch hinzugefügt!');
+  addSessionXP(5, '📚');
+}
+
+// ═══════════════════════════════════
+// PHASE 3: GRAMMAR
+// ═══════════════════════════════════
+function renderGrammarPhase() {
+  const lesson = GRAMMAR_LESSONS[grammarIdx];
+  const area = document.getElementById('step-area');
+
+  const fillsHtml = lesson.fills.map((f,i) => `
+    <div class="fill-line">
+      ${f.before}<input class="fill-inp" id="fi-${i}" placeholder="${f.hint||'...'}">${f.after}
+    </div>
+  `).join('');
+
+  area.innerHTML = `
+    <div class="grammar-rule">
+      <div class="grammar-rule-title">${lesson.title}</div>
+      <div class="grammar-rule-body">${lesson.rule}</div>
+    </div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:12px">Fülle die Lücken aus:</div>
+    ${fillsHtml}
+    <div class="btn-row" style="margin-top:8px">
+      <button class="btn btn-green btn-full" onclick="checkGrammar()">Überprüfen ✓</button>
+    </div>
+    <div id="gram-result" style="min-height:18px;margin-top:10px;font-size:13px;color:var(--t2)"></div>
+    <div id="gram-next" style="display:none;margin-top:12px">
+      <button class="btn btn-green btn-full btn-lg" onclick="nextPhase()">Weiter zum Hören →</button>
+    </div>
+  `;
+}
+
+function checkGrammar() {
+  const lesson = GRAMMAR_LESSONS[grammarIdx];
+  let correct = 0;
+  lesson.fills.forEach((f,i) => {
+    const inp = document.getElementById('fi-'+i);
+    if (!inp) return;
+    const val = inp.value.trim().toLowerCase();
+    if (val === f.answer.toLowerCase()) {
+      inp.className = 'fill-inp ok'; correct++;
+    } else {
+      inp.className = 'fill-inp err';
+      // Show correct answer hint
+      inp.title = '✓ ' + f.answer;
+    }
+  });
+  const total = lesson.fills.length;
+  const resultEl = document.getElementById('gram-result');
+  if (correct === total) {
+    resultEl.textContent = '🎉 Alle ' + total + ' richtig! Perfekt!';
+    addSessionXP(25, '🏆');
+    sessionData.grammarDone = true;
+    document.getElementById('gram-next').style.display = 'block';
+    confetti();
+  } else {
+    resultEl.textContent = correct + ' von ' + total + ' richtig. Falsche Antworten sind jetzt rot markiert.';
+    addSessionXP(correct * 5, '✅');
+    // Allow proceed after attempt
+    setTimeout(() => {
+      sessionData.grammarDone = true;
+      document.getElementById('gram-next').style.display = 'block';
+    }, 1500);
+  }
+}
+
+// ═══════════════════════════════════
+// PHASE 4: LISTENING
+// ═══════════════════════════════════
+let listenAnswered = 0, listenRevealed = false;
+function renderListeningPhase() {
+  const ex = LISTENING[listeningIdx];
+  listenAnswered = 0; listenRevealed = false;
+  const area = document.getElementById('step-area');
+
+  area.innerHTML = `
+    <div class="listen-player">
+      <div style="font-size:14px;color:var(--t2);margin-bottom:8px">Höre den Text und beantworte die Fragen</div>
+      <div id="listen-phrases" style="display:none;text-align:left">
+        ${ex.phrases.map(p => `<div style="font-family:'Lora',serif;font-size:14px;margin-bottom:8px;line-height:1.7">"${p}"</div>`).join('')}
+      </div>
+      <div class="listen-controls">
+        <button class="play-btn" id="play-btn" onclick="playListening()">▶</button>
+      </div>
+      <div class="listen-hint" id="listen-hint">Drücke ▶ um den Text zu hören</div>
+    </div>
+    <div id="listen-qs" style="opacity:.4;pointer-events:none">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">Fragen:</div>
+    </div>
+    <div id="listen-done" style="display:none;margin-top:14px">
+      <button class="btn btn-green btn-full btn-lg" onclick="finishListening()">Session abschließen 🏆</button>
+    </div>
+  `;
+
+  const qArea = document.getElementById('listen-qs');
+  ex.questions.forEach((q,qi) => {
+    const div = document.createElement('div');
+    div.style.marginBottom = '14px';
+    div.innerHTML = `<div style="font-size:14px;font-weight:600;margin-bottom:8px">❓ ${q.q}</div>`;
+    q.opts.forEach((opt, oi) => {
+      const b = document.createElement('button');
+      b.className = 'rq-btn';
+      b.textContent = ['A','B','C','D'][oi] + ') ' + opt;
+      b.onclick = () => answerListenQ(qi, oi, q.ans, b, div, ex.questions.length);
+      div.appendChild(b);
+    });
+    qArea.appendChild(div);
+  });
+}
+
+function playListening() {
+  const ex = LISTENING[listeningIdx];
+  const btn = document.getElementById('play-btn');
+  const hint = document.getElementById('listen-hint');
+  const qs = document.getElementById('listen-qs');
+
+  if (!window.speechSynthesis) { hint.textContent = '⚠️ Text-to-Speech nicht verfügbar.'; return; }
+  const fullText = ex.phrases.join(' ');
+  const utt = new SpeechSynthesisUtterance(fullText);
+  utt.lang = 'en-GB'; utt.rate = 0.85;
+  btn.textContent = '⏸';
+  hint.textContent = '▶ Wird abgespielt…';
+  document.getElementById('listen-phrases').style.display = 'block';
+
+  utt.onend = () => {
+    btn.textContent = '▶';
+    hint.textContent = 'Nochmal hören? Beantworte jetzt die Fragen!';
+    qs.style.opacity = '1';
+    qs.style.pointerEvents = 'all';
+  };
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utt);
+}
+
+function answerListenQ(qi, chosen, correct, btn, container, total) {
+  container.querySelectorAll('.rq-btn').forEach(b => b.disabled = true);
+  if (chosen === correct) {
+    btn.classList.add('correct');
+    addSessionXP(15, '✅');
+  } else {
+    btn.classList.add('wrong');
+    container.querySelectorAll('.rq-btn')[correct].classList.add('correct');
+    addSessionXP(3, '📖');
+  }
+  listenAnswered++;
+  if (listenAnswered >= total) {
+    sessionData.listeningDone = true;
+    document.getElementById('listen-done').style.display = 'block';
+  }
+}
+
+function finishListening() { nextPhase(); }
+
+// ═══════════════════════════════════
+// SESSION FINISH
+// ═══════════════════════════════════
+async function finishSession() {
+  const duration = Math.round((Date.now() - sessionStartTime) / 1000);
+
+  // Save XP & streak
+  const today = new Date().toDateString();
+  userProgress.xp_total = (userProgress.xp_total||0) + sessionXP;
+  userProgress.xp_today = (userProgress.xp_today||0) + sessionXP;
+  userProgress.sessions_completed = (userProgress.sessions_completed||0) + 1;
+  if (userProgress.last_session_date !== today) {
+    const yesterday = new Date(Date.now()-86400000).toDateString();
+    userProgress.streak = userProgress.last_session_date === yesterday ? (userProgress.streak||0)+1 : 1;
+    userProgress.last_session_date = today;
+  }
+  await saveProgress();
+
+  await saveSessionHistory({
+    xp_earned: sessionXP,
+    vocab_reviewed: sessionData.vocabTotal,
+    vocab_correct: sessionData.vocabCorrect,
+    reading_done: sessionData.readingDone,
+    grammar_done: sessionData.grammarDone,
+    listening_done: sessionData.listeningDone,
+    duration_seconds: duration,
+  });
+
+  // Show done screen
+  showScreen('done');
+  document.getElementById('done-xp').textContent = '+' + sessionXP + ' XP';
+
+  const pct = sessionData.vocabTotal > 0 ? Math.round(sessionData.vocabCorrect/sessionData.vocabTotal*100) : 0;
+  const mins = Math.round(duration/60);
+  document.getElementById('done-sub').textContent =
+    `${mins} Minuten · ${pct}% Vokabeln gewusst · Streak: ${userProgress.streak} Tage 🔥`;
+
+  document.getElementById('done-stats').innerHTML = `
+    <div class="done-stat"><div class="n">${sessionData.vocabTotal}</div><div class="l">Vokabeln</div></div>
+    <div class="done-stat"><div class="n">${pct}%</div><div class="l">Richtig</div></div>
+    <div class="done-stat"><div class="n">${mins}m</div><div class="l">Dauer</div></div>
+    <div class="done-stat"><div class="n">${userProgress.streak}</div><div class="l">🔥 Streak</div></div>
+  `;
+  confetti();
+}
+
+function endSession() {
+  showScreen('main');
+  renderHome();
+}
+
+// ═══════════════════════════════════
+// DICTIONARY
+// ═══════════════════════════════════
+let dictFilter = 'all';
+function dictTab(filter, btn) {
+  dictFilter = filter;
+  document.querySelectorAll('.dict-tabs button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderDict();
+}
+
+function renderDict() {
+  const search = (document.getElementById('dict-search')?.value||'').toLowerCase();
+  const now = Date.now();
+  const list = document.getElementById('dict-list');
+  if (!list) return;
+
+  let words = VOCAB.filter(v => {
+    const c = srsCards[v.w];
+    if (search && !v.w.toLowerCase().includes(search) && !v.de.toLowerCase().includes(search)) return false;
+    if (dictFilter === 'master') return c && c.status === 'master';
+    if (dictFilter === 'struggle') return c && c.repetitions > 0 && c.ease_factor < 1.8;
+    if (dictFilter === 'new') return !c || c.repetitions === 0;
+    if (dictFilter === 'due') return !c || c.next_due <= now;
+    return true;
+  });
+
+  list.innerHTML = '';
+  if (!words.length) {
+    list.innerHTML = '<div style="text-align:center;color:var(--t3);padding:24px;font-size:13px">Keine Wörter gefunden.</div>';
+    return;
+  }
+
+  words.slice(0, 80).forEach(v => {
+    const c = srsCards[v.w];
+    let statusClass = 'ds-new', statusText = '🆕 Neu';
+    if (c) {
+      if (c.status === 'master') { statusClass='ds-master'; statusText='⭐ Gemeistert'; }
+      else if (c.ease_factor < 1.8 && c.repetitions > 0) { statusClass='ds-struggle'; statusText='🔴 Schwierig'; }
+      else if (c.repetitions > 0) { statusClass='ds-learn'; statusText='📚 Im Lernen'; }
+    }
+    const nextDue = c?.next_due > Date.now()
+      ? 'Nächste Wiederholung: ' + new Date(c.next_due).toLocaleDateString('de-DE')
+      : (c ? '⏰ Fällig' : '');
+
+    const div = document.createElement('div');
+    div.className = 'dict-entry';
+    div.innerHTML = `
+      <div style="flex:1">
+        <div class="dict-word">${v.w} <span style="font-size:12px;color:var(--t3);font-style:italic">${v.ph||''}</span></div>
+        <div class="dict-de">${v.de}</div>
+        ${nextDue ? `<div style="font-size:10px;color:var(--t3);margin-top:2px">${nextDue}</div>` : ''}
+      </div>
+      <span class="dict-status ${statusClass}">${statusText}</span>
+    `;
+    list.appendChild(div);
+  });
+
+  if (words.length > 80) {
+    const more = document.createElement('div');
+    more.style.cssText = 'text-align:center;color:var(--t3);font-size:12px;padding:12px';
+    more.textContent = `+ ${words.length - 80} weitere Wörter — nutze die Suche`;
+    list.appendChild(more);
+  }
+}
+
+// ═══════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════
+async function renderHistory() {
+  const list = document.getElementById('history-list');
+  list.innerHTML = '<div style="color:var(--t3);font-size:13px">Lade…</div>';
+  const { data } = await sb.from('session_history')
+    .select('*').eq('user_id', currentUser.id)
+    .order('completed_at', { ascending: false }).limit(30);
+
+  if (!data?.length) {
+    list.innerHTML = '<div style="color:var(--t3);font-size:13px;text-align:center;padding:24px">Noch keine Sessions abgeschlossen.</div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  data.forEach(s => {
+    const d = new Date(s.completed_at);
+    const dateStr = d.toLocaleDateString('de-DE', { weekday:'short', day:'numeric', month:'short' });
+    const timeStr = d.toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit' });
+    const pct = s.vocab_reviewed > 0 ? Math.round(s.vocab_correct/s.vocab_reviewed*100) : 0;
+    const mins = Math.round(s.duration_seconds/60);
+
+    const div = document.createElement('div');
+    div.className = 'hist-entry';
+    div.innerHTML = `
+      <div class="hist-date">${dateStr} · ${timeStr} · ${mins} Min.</div>
+      <div class="hist-pills">
+        <span class="hist-pill">📖 ${s.vocab_reviewed} Vokabeln (${pct}%)</span>
+        ${s.reading_done   ? '<span class="hist-pill" style="background:var(--blue-bg);color:var(--blue)">📄 Lesen ✓</span>' : ''}
+        ${s.grammar_done   ? '<span class="hist-pill" style="background:var(--green-bg);color:var(--green)">✏️ Grammatik ✓</span>' : ''}
+        ${s.listening_done ? '<span class="hist-pill" style="background:var(--purple-bg);color:var(--purple)">🎧 Hören ✓</span>' : ''}
+      </div>
+      <div class="hist-xp">+${s.xp_earned} XP</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════
+// XP & GAMIFICATION
+// ═══════════════════════════════════
+function addSessionXP(n, icon='⭐') {
+  sessionXP += n;
+  // Show floating XP pop
+  const pop = document.createElement('div');
+  pop.className = 'xp-pop';
+  pop.textContent = icon + ' +' + n + ' XP';
+  pop.style.left = (20 + Math.random()*60) + '%';
+  pop.style.bottom = '30%';
+  document.body.appendChild(pop);
+  setTimeout(() => pop.remove(), 1000);
+}
+
+function confetti() {
+  const wrap = document.createElement('div');
+  wrap.className = 'confetti';
+  const colors = ['#2a5c3e','#9a7418','#b83030','#1a4a8a','#5a2a9a'];
+  for (let i=0; i<40; i++) {
+    const s = document.createElement('span');
+    s.style.cssText = `left:${Math.random()*100}%;background:${colors[i%colors.length]};
+      animation-delay:${Math.random()*0.5}s;animation-duration:${0.8+Math.random()*0.8}s;
+      top:${-20-Math.random()*20}px`;
+    wrap.appendChild(s);
+  }
+  document.body.appendChild(wrap);
+  setTimeout(() => wrap.remove(), 2000);
+}
+
+// ═══════════════════════════════════
+// TOAST
+// ═══════════════════════════════════
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ═══════════════════════════════════
+// BOOT
+// ═══════════════════════════════════
+init();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+  SETUP-ANLEITUNG (kannst du nach dem Einrichten löschen)
+  ════════════════════════════════════════════════════════
+  
+  1. Gehe zu https://supabase.com und klicke "Start your project"
+  2. Erstelle ein kostenloses Konto und ein neues Projekt
+  3. Gehe zu: Project → SQL Editor → New Query
+  4. Kopiere den Inhalt von "supabase_schema.sql" und führe ihn aus
+  5. Gehe zu: Project Settings → API
+     - Kopiere "Project URL" → ersetze YOUR_SUPABASE_URL
+     - Kopiere "anon public" key → ersetze YOUR_SUPABASE_ANON_KEY
+  6. Speichere die HTML-Datei und öffne sie im Browser
+  
+  Fertig! Jetzt kannst du dich registrieren und von überall 
+  auf deine Daten zugreifen — auch auf dem Handy!
+  
+  Für echte URL: Lade die Datei auf https://app.netlify.com/drop hoch.
+══════════════════════════════════════════════════════════ -->
+</body>
+</html>
